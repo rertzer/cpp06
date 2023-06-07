@@ -1,4 +1,7 @@
 #include <iostream>
+#include <cctype>
+#include <climits>
+#include <sstream>
 
 struct	number
 {
@@ -24,6 +27,9 @@ class	ScalarConverter
 		ScalarConverter(){};
 		ScalarConverter(ScalarConverter const sc){};
 		~ScalarConverter(){};
-		ScalarConerter & operator=(ScalarConverter const rhs){};
+		ScalarConverter & operator=(ScalarConverter const rhs){};
+		
+		static void	convertNumber(std::string const & literal, struct & number nb);
+		static void nbParsing(std::string const & literal);
 }
 
