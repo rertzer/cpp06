@@ -1,29 +1,48 @@
 #include "ScalarConverter.hpp"
 
-static void	ScalarConverter::convert(std::string  const literal)
+ScalarConverter::ScalarConverter()
+{}
+
+ScalarConverter::ScalarConverter(ScalarConverter const & sc)
 {
-	int	type = 4;
-	struct number nb = {0, 0, 0, 0, 1, false, false, false, false};
-	void (* funCast[])(std::string const) = {
-		&charcast,
-		&intcast,
-		&doublecast,
-		&floatcast
-	};
-	
-	type = getType(literal, nb);
-	if (type == 4)
-	{
-		cout << "Bad luck: parsing error\n";
-		return;
-	}
-	funcast[type](literal, nb);
-	printnb(nb);
+	static_cast<void>(sc);
 }
 
-static int ScalarConverter::getType(std::string const literal)
+ScalarConverter::~ScalarConverter()
+{}
+
+ScalarConverter & ScalarConverter::operator=(ScalarConverter const & rhs)
 {
-	int	state = 0;
+	static_cast<void>(rhs);
+	return *this;
+}
+
+void	ScalarConverter::convert(std::string const & literal)
+{
+	int	type = 4;
+	struct number nb = {0, 0, 0, 0, false, false, false, false};
+	void (* funCast[])(std::string const &, struct number &) = {
+		&charCast,
+		&intCast,
+		&doubleCast,
+		&floatCast,
+		&dspecCast,
+		&fspecCast
+	};
+	
+	type = getType(literal);
+	std::cerr << "type is " << type << std::endl;
+	if (type == 7)
+	{
+		std::cout << "Bad luck: parsing error\n";
+		return;
+	}
+	funCast[type](literal, nb);
+	printNb(nb);
+}
+
+int ScalarConverter::getType(std::string const & literal)
+{
 	std::string const dspecial[] = {"-inf", "+inf", "nan"};
 	std::string const fspecial[] = {"-inff", "+inff", "nanf"};
 
@@ -33,137 +52,167 @@ static int ScalarConverter::getType(std::string const literal)
 
 	for (int i = 0; i < 3; i++)
 	{
-		if (literal.compare(dspecial[i] == 0))
-				return 2;
-		if (literal.compare(fspecial[i] == 0))
-			return 3;
+		if (literal.compare(dspecial[i]) == 0)
+				return 4;
+		if (literal.compare(fspecial[i]) == 0)
+			return 5;
 	}
-
 	return (nbParsing(literal));
 }
 
-static int	ScalarConverter::nbParsing(std::string const &  literal)
+int	ScalarConverter::nbParsing(std::string const &  literal)
 {
-	for (int i = 0 ; i < literal.size(); i++)
+	int	state = 0;
+
+	for (unsigned int i = 0 ; i < literal.size(); i++)
 	{
 		switch (state)
 		{
 			case 0:
-				state = 1;
-				if (literal[i] == '-')
-					nb.sign = -1;
-				else if (!isdigit(literal[i]) && literal[i] != '+')
-					state = 4;
+				if (isdigit(literal[i]))
+					state = 1;
+				else if ((literal[i] != '+' || literal[i] != '-'))
+					state = 6;
+				else
+					state = 7;
 				break;
 			case 1:
-				if (literal == '.')
-					case = 2;
+				if (literal[i] == '.')
+					state = 2;
 				else if (!isdigit(literal[i]))
-					state = 4;
+					state = 7;
 				break;
 			case 2:
-				if (literal == 'f')
+				if (literal[i] == 'f')
 					state = 3;
-				else if (!isdigit(lieral[i]))
-					state = 4;
+				else if (!isdigit(literal[i]))
+					state = 7;
 				break;
 			case 3:
-				state = 4;
+				state = 7;
 				break;
+			case 6:
+				if (isdigit(literal[i]))
+					state = 1;
+				else
+					state = 7;
 		}
-		if (state == 4)
+		if (state == 7)
 			break;
 	}
-		return state;
+	if (state == 6)
+		state = 7;
+	return state;
 }
 
-static void	ScalarConverter::charcast(std::string const & literal, struct number & nb)
+void	ScalarConverter::charCast(std::string const & literal, struct number & nb)
 {
 	nb.c = literal[0];
 	nb.c_ok = 1;
 	
-	nb.i = static_cast<int> nb.c;
+	nb.i = static_cast<int>(nb.c);
 	nb.i_ok = 1;
 	
-	nb.d = static_cast<double> nb.c;
+	nb.d = static_cast<double>(nb.c);
 	nb.d_ok = 1;
 
-	nb.f = static_cast<float> nb.f;
+	nb.f = static_cast<float>(nb.c);
 	nb.f_ok = 1;
 }
 
-static void	ScalarConverter::intcast(std::string const & literal, struct nunber nb)
+void	ScalarConverter::intCast(std::string const & literal, struct number & nb)
 {
-	stringstream	ss;
+	std::stringstream	ss;
 
 	ss << literal;
-	ss>> nb.i;
+	ss >> nb.i;
 	if (ss.fail())
 		return ;
 	nb.i_ok = 1;
 
-	if (nb.d <= static_cast<double>CHAR_MAX && nb.d >= static_cast<double>CHAR_MIN)
+	if (nb.d <= static_cast<double>(std::numeric_limits<char>::max()) && nb.d >= static_cast<double>(std::numeric_limits<char>::min()))
 	{
-		nb.c = static_cast<char> nb.i;
+		nb.c = static_cast<char>(nb.i);
 		nb.c_ok = 1;
 	}
 	
-	nb.d = static_cast<double> nb.i;
+	nb.d = static_cast<double>(nb.i);
 	nb.d_ok = 1;
 
-	nb.f = static_cast<float> nb.i;
+	nb.f = static_cast<float>(nb.i);
 	nb.f_ok = 1;
 }
 
-static void	ScalarConverter::doublecast(std::string const & literal, struct number nb)
+void	ScalarConverter::doubleCast(std::string const & literal, struct number & nb)
 {
-	stringstream	ss;
+	std::stringstream	ss;
 	
 	ss << literal;
-	nb.d << literal;
+	ss >> nb.d;
 	if (ss.fail())
 		return ;
 	nb.d_ok = 1;
 
-	if (nb.d <= static_cast<double>CHAR_MAX && nb.d >= static_cast<double>CHAR_MIN)
+	if (nb.d <= static_cast<double>(std::numeric_limits<char>::max()) && nb.d >= static_cast<double>(std::numeric_limits<char>::min()))
 	{
-		nb.c = static_cast<char> nb.d;
+		nb.c = static_cast<char>(nb.d);
 		nb.c_ok = 1;
 	}
-	if (nb.d <= static_cast<double>INT_MAX && nb.d >= static_cast<double>INT_MIN)
+	if (nb.d <= static_cast<double>(std::numeric_limits<int>::max()) && nb.d >= static_cast<double>(std::numeric_limits<int>::min()))
 	{
-		nb.i = static_cast<int> nb.d;
+		nb.i = static_cast<int>(nb.d);
 		nb.i_ok = 1;
 	}
-	nb.f = static_cast<float> nb.d;
-	nb.f_ok = 1;
+	if (std::abs(nb.d) <= static_cast<double>(std::numeric_limits<float>::max()))
+	{
+		nb.f = static_cast<float>(nb.d);
+		nb.f_ok = 1;
+	}
 }
 
-static void	ScalarConverter::floatcast(std::string const & literal, struct number nb)
+void	ScalarConverter::floatCast(std::string const & literal, struct number & nb)
 {
-	stringstream	ss;
+	std::stringstream	ss;
 	
 	ss << literal;
-	nb.f << literal;
+	ss >> nb.f;
 	if (ss.fail())
 		return ;
 	nb.f_ok = 1;
 
-	if (nb.f <= static_cast<double>CHAR_MAX && nb.f >= static_cast<double>CHAR_MIN)
+	if (nb.f <= static_cast<double>(std::numeric_limits<char>::max()) && nb.f >= static_cast<double>(std::numeric_limits<char>::min()))
 	{
-		nb.c = static_cast<char> nb.f;
+		nb.c = static_cast<char>(nb.f);
 		nb.c_ok = 1;
 	}
-	if (nb.f <= static_cast<double>INT_MAX && nb.f >= static_cast<double>INT_MIN)
+	if (nb.f <= static_cast<double>(std::numeric_limits<int>::max()) && nb.f >= static_cast<double>(std::numeric_limits<int>::min()))
 	{
-		nb.i = static_cast<int> nb.f;
+		nb.i = static_cast<int>(nb.f);
 		nb.i_ok = 1;
 	}
-	nb.d = static_cast<float> nb.f;
+	nb.d = static_cast<float>(nb.f);
 	nb.d_ok = 1;
 }
 
-static void	ScalarConverter::printNb(stuct number nb)
+void	ScalarConverter::dspecCast(std::string const & literal, struct number & nb)
+{
+	nb.d = std::strtod(literal.c_str(), NULL);
+	nb.d_ok = 1;
+
+	nb.f = static_cast<float>(nb.d);
+	nb.f_ok = 1;
+}
+
+void	ScalarConverter::fspecCast(std::string const & literal, struct number & nb)
+{
+	nb.f = std::strtof(literal.c_str(), NULL);
+	nb.f_ok = 1;
+
+	nb.d = static_cast<float>(nb.f);
+	nb.d_ok = 1;
+}
+
+void	ScalarConverter::printNb(struct number const & nb)
 {
 	if (nb.c_ok)
 	{
@@ -173,20 +222,20 @@ static void	ScalarConverter::printNb(stuct number nb)
 			std::cout << "char: Non displayable\n";
 	}
 	else
-		std::cout << "impossible\n";
+		std::cout << "char: impossible\n";
 	
 	if (nb.i_ok)
-		std::cout << "int: " << nb.c << std::endl;
+		std::cout << "int: " << nb.i << std::endl;
 	else
-		std::cout << "int: Non displayable\n";
+		std::cout << "int: impossible\n";
 	if (nb.f_ok)
 		std::cout << "float: " << std::fixed << std::setprecision(1) << nb.f << std::endl;
 	else
-		std::cout << "float: Non displayable\n";
+		std::cout << "float: impossible\n";
 	if (nb.d_ok)
-		std::cout << "double: " << std::fixed << std::setprecision(1) << nb.d << std::end;
+		std::cout << "double: " << std::fixed << std::setprecision(1) << nb.d << std::endl;
 	else
-		std::cout << "double: Non displayable\n";
+		std::cout << "double: impossible\n";
 }
 
 
@@ -202,4 +251,4 @@ static void	ScalarConverter::printNb(stuct number nb)
 
 
 
-}
+

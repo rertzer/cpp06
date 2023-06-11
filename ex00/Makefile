@@ -10,7 +10,7 @@ OBJ_DIR = obj/
 
 INC_DIR = ./
 
-SOURCES = main.cpp
+SOURCES = main.cpp ScalarConverter.cpp
 
 OBJ = $(SOURCES:.cpp=.o)
 
