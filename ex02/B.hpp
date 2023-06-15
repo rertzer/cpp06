@@ -1,33 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Base.hpp                                           :+:      :+:    :+:   */
+/*   B.hpp                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rertzer <rertzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/11 19:51:26 by rertzer           #+#    #+#             */
-/*   Updated: 2023/06/15 11:42:41 by rertzer          ###   ########.fr       */
+/*   Created: 2023/06/15 11:44:39 by rertzer           #+#    #+#             */
+/*   Updated: 2023/06/15 11:44:51 by rertzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef BASE_H
-# define BASE_H
 
-# include <iostream>
-# include <exception>
-# include <cstdlib>
-# include <ctime>
+#ifndef B_HPP
+# define B_HPP
 
-class	Base
-{
-	public:
-		virtual	~Base(){};
-};
+# include "Base.hpp"
 
-
-
-Base *	generate(void);
-void	identify(Base* p);
-void	identify(Base& p);
+class	B: public Base
+{};
 
 #endif

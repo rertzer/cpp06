@@ -6,7 +6,7 @@
 /*   By: rertzer <rertzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/11 20:58:02 by rertzer           #+#    #+#             */
-/*   Updated: 2023/06/11 20:58:10 by rertzer          ###   ########.fr       */
+/*   Updated: 2023/06/15 11:26:05 by rertzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ void	ScalarConverter::convert(std::string const & literal)
 	};
 	
 	type = getType(literal);
-	std::cerr << "type is " << type << std::endl;
 	if (type == 7)
 	{
 		std::cout << "Bad luck: parsing error\n";
@@ -90,7 +89,7 @@ int	ScalarConverter::nbParsing(std::string const &  literal)
 				break;
 			case 1:
 				if (literal[i] == '.')
-					state = 2;
+					state = 8;
 				else if (!isdigit(literal[i]))
 					state = 7;
 				break;
@@ -108,11 +107,23 @@ int	ScalarConverter::nbParsing(std::string const &  literal)
 					state = 1;
 				else
 					state = 7;
+				break;
+			case 7:
+				break;
+			case 8:
+				if (isdigit(literal[i]))
+					state = 2;
+				else
+					state = 7;
+				break;
+			default:
+				state = 7;
+				break;
 		}
 		if (state == 7)
 			break;
 	}
-	if (state == 6)
+	if (state == 6 || state == 8)
 		state = 7;
 	return state;
 }
@@ -142,7 +153,7 @@ void	ScalarConverter::intCast(std::string const & literal, struct number & nb)
 		return ;
 	nb.i_ok = 1;
 
-	if (nb.d <= static_cast<double>(std::numeric_limits<char>::max()) && nb.d >= static_cast<double>(std::numeric_limits<char>::min()))
+	if (nb.i <= static_cast<int>(std::numeric_limits<char>::max()) && nb.i >= static_cast<int>(std::numeric_limits<char>::min()))
 	{
 		nb.c = static_cast<char>(nb.i);
 		nb.c_ok = 1;
@@ -192,17 +203,17 @@ void	ScalarConverter::floatCast(std::string const & literal, struct number & nb)
 		return ;
 	nb.f_ok = 1;
 
-	if (nb.f <= static_cast<double>(std::numeric_limits<char>::max()) && nb.f >= static_cast<double>(std::numeric_limits<char>::min()))
+	if (nb.f <= static_cast<float>(std::numeric_limits<char>::max()) && nb.f >= static_cast<float>(std::numeric_limits<char>::min()))
 	{
 		nb.c = static_cast<char>(nb.f);
 		nb.c_ok = 1;
 	}
-	if (nb.f <= static_cast<double>(std::numeric_limits<int>::max()) && nb.f >= static_cast<double>(std::numeric_limits<int>::min()))
+	if (nb.f <= static_cast<float>(std::numeric_limits<int>::max()) && nb.f >= static_cast<float>(std::numeric_limits<int>::min()))
 	{
 		nb.i = static_cast<int>(nb.f);
 		nb.i_ok = 1;
 	}
-	nb.d = static_cast<float>(nb.f);
+	nb.d = static_cast<double>(nb.f);
 	nb.d_ok = 1;
 }
 
@@ -220,7 +231,7 @@ void	ScalarConverter::fspecCast(std::string const & literal, struct number & nb)
 	nb.f = std::strtof(literal.c_str(), NULL);
 	nb.f_ok = 1;
 
-	nb.d = static_cast<float>(nb.f);
+	nb.d = static_cast<double>(nb.f);
 	nb.d_ok = 1;
 }
 
@@ -240,27 +251,14 @@ void	ScalarConverter::printNb(struct number const & nb)
 		std::cout << "int: " << nb.i << std::endl;
 	else
 		std::cout << "int: impossible\n";
+
 	if (nb.f_ok)
-		std::cout << "float: " << std::fixed << std::setprecision(1) << nb.f << std::endl;
+		std::cout << "float: " << std::fixed << std::setprecision(1) << nb.f << "f" << std::endl;
 	else
 		std::cout << "float: impossible\n";
+
 	if (nb.d_ok)
 		std::cout << "double: " << std::fixed << std::setprecision(1) << nb.d << std::endl;
 	else
 		std::cout << "double: impossible\n";
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

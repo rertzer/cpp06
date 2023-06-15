@@ -6,11 +6,14 @@
 /*   By: rertzer <rertzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/11 19:57:19 by rertzer           #+#    #+#             */
-/*   Updated: 2023/06/11 20:51:54 by rertzer          ###   ########.fr       */
+/*   Updated: 2023/06/15 11:54:04 by rertzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Base.hpp"
+#include "A.hpp"
+#include "B.hpp"
+#include "C.hpp"
 
 Base *	generate(void)
 {
@@ -46,14 +49,16 @@ void	identify(Base * p)
 	else if (pc != 0)
 		std::cout << p << " is a C pointer\n";
 	else
-		std::cout << "Oups! something got wrong\n";
+		std::cout << "Oups! something went wrong\n";
 }
 
 void	identify(Base & p)
 {
+	bool	ok = false;
 	try
 	{
 		A & ra = dynamic_cast<A&>(p);
+		ok = true;
 		std::cout << &ra << " is a A reference\n";
 	}
 	catch (std::exception & bc)
@@ -62,6 +67,7 @@ void	identify(Base & p)
 	try
 	{
 		B & rb = dynamic_cast<B&>(p);
+		ok = true;
 		std::cout << &rb << " is a B reference\n";
 	}
 	catch (std::exception & bc)
@@ -70,9 +76,12 @@ void	identify(Base & p)
 	try
 	{
 		C & rc = dynamic_cast<C&>(p);
+		ok = true;
 		std::cout << &rc << " is a C reference\n";
 	}
 	catch (std::exception & bc)
 	{
 	}
+	if (!ok)
+		std::cout << "Oups! something went wrong!\n";
 }
